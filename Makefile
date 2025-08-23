@@ -20,9 +20,9 @@ MAIN = TermiChat
 all: deps $(SETUP) $(MAIN)
 
 deps:
-	@command -v sqlite3 >/dev/null 2>&1 || { echo "Installing sqlite3..."; sudo apt-get install -y sqlite3 libsqlite3-dev; }
-	@command -v ncursesw6-config >/dev/null 2>&1 || { echo "Installing ncurses..."; sudo apt-get install -y libncurses5-dev libncursesw5-dev; }
-	@command -v openssl >/dev/null 2>&1 || { echo "Installing openssl..."; sudo apt-get install -y libssl-dev; }
+	@command -v sqlite3 >/dev/null 2>&1 || { echo "Installing sqlite3..."; sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev; }
+	@command -v ncurses5-config >/dev/null 2>&1 || { echo "Installing ncurses..."; sudo apt-get install -y libncurses5-dev libncursesw5-dev; }
+	@pkg-config --exists openssl || { echo "Installing openssl..."; sudo apt-get install -y libssl-dev; }
 
 $(SETUP): Setup.o
 	$(CXX) $^ -lsqlite3 -o $@
