@@ -17,8 +17,13 @@ OBJ = $(SRC:.cpp=.o)
 SETUP = Setup
 MAIN = TermiChat
 
-all: $(SETUP) $(MAIN)
+all: check_deps $(SETUP) $(MAIN)
 
+check_deps:
+	@command -v sqlite3 >/dev/null 2>&1 || { \
+		echo "sqlite3 not found. Installing..."; \
+		sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev; \
+	}
 $(SETUP): Setup.o
 	$(CXX) $^ -lsqlite3 -o $@
 
