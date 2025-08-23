@@ -238,12 +238,7 @@ void StartChat(string username){
 
     // Build chat windows once accepted
     int height = LINES-3, width = COLS;
-    chat_win = newwin(height,width,0,0);
-    
-    input_win = newwin(3,width,height,0);
-    scrollok(chat_win,TRUE);
-    
-    box(input_win,0,0);
+
     mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
     wrefresh(chat_win); wrefresh(input_win);
 

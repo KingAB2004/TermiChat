@@ -19,7 +19,7 @@
 #include <ctime>
 #include <cctype>
 #define BUF_SIZE 1024
-
+#include"../Encryption/Encryptor.h"
 
 using namespace std;
 struct Friend {

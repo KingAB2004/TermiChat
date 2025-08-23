@@ -20,7 +20,14 @@ int main(){
     noecho();
     keypad(stdscr,TRUE);
     curs_set(0);
+        int height = LINES-3, width = COLS;
 
+        chat_win = newwin(height,width,0,0);
+    
+    input_win = newwin(3,width,height,0);
+    scrollok(chat_win,TRUE);
+    
+    box(input_win,0,0);
     thread(listener_thread, LISTEN_PORT).detach();
 
     std::vector<std::string> menu = {"Add Friend","List Friends","Start a Chat","Start Group Chat","Exit"};
