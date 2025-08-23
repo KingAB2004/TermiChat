@@ -1,191 +1,6 @@
 #include "P2P_TermiChat.h"
 #include "../Encryption/Encryptor.h"
-#include <sqlite3.h>
-#include <ncurses.h>
-#include <thread>
-#include <mutex>
-#include <atomic>
-#include <algorithm>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <fstream>
-#include <iostream>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <ctime>
-#include <cctype>
 
-#define BUF_SIZE 1024
-
-using namespace std;
-
-
-struct Friend {
-    string name;
-    string ip;
-};
-
-//  Defining the Global variables
-WINDOW *chat_win = nullptr, *input_win = nullptr;
-mutex chat_mutex;
-bool running = true;
-
-sqlite3* db = nullptr;
-AES_Encryptor* aes = nullptr;
-// Keys can be changed based on your choice
-vector<unsigned char> key(32, 0x01);
-vector<unsigned char> iv(16, 0x02);
-
-string my_username;
-string peer_username;
-atomic<bool> session_active{false};
-
-// Listening port can be choosen based on which port is free on both the computers
-int LISTEN_PORT = 50000;
-
-// ////Helper Functions//// 
-
-// This is the Packet which the user or the friend sends to confirm whether he wants to connect or not 
-// Also it Tells wheather the sent Message is a file or text
-enum PacketType : unsigned char {
-    PT_TEXT            = 0,
-    PT_FILE            = 1,
-    PT_CONNECT_REQUEST = 2,
-    PT_CONNECT_ACCEPT  = 3,
-    PT_CONNECT_REJECT  = 4
-};
-
-static void safe_print_stdout(const string& s) {
-    fprintf(stdout, "%s\n", s.c_str());
-    fflush(stdout);
-}
-
-//  for Printing the Messages
-void print_message(const string &msg){
-    lock_guard<mutex> lock(chat_mutex);
-    if (chat_win) {
-        wprintw(chat_win, "%s\n", msg.c_str());
-        wrefresh(chat_win);
-    } else {
-        safe_print_stdout(msg);
-    }
-}
-// It for sending a packet using the socket given along with the data you have to send 
-
-// Scoket Structure  ->  Packet Type 1byte  | Payload Length() 4 Byte | Payload Data Payload.size()
-static bool send_packet(int sock, PacketType t, const std::vector<unsigned char>& DAta) {
-    // here the htonl is used to convert it into network Style
-    uint32_t nsize = htonl((uint32_t)DAta.size());
-    
-    if (write(sock, &t, 1) != 1) return false;
-    
-    if (write(sock, &nsize, 4) != 4) return false;
-    size_t off = 0, left = DAta.size();
-
-    while (left) {
-
-        ssize_t n = write(sock, DAta.data() + off, left);
-        if (n <= 0) return false;
-        off += (size_t)n; left -= (size_t)n;
-    }
-    return true;
-}
-
-static bool recv_fully(int sock, void* buf, size_t len) {
-    char* p = (char*)buf;
-//    Checking if received fully or not
-    size_t got = 0;
-    while (got < len) {
-   
-        ssize_t n = read(sock, p + got, len - got);
-   
-        if (n <= 0) return false;
-        got += (size_t)n;
-    }
-    return true;
-}
-
-// Function for Receiving the Packet as ordered by the socket structure
-
-static bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) {
-    unsigned char tbyte;
-    uint32_t nsize_net;
-    if (!recv_fully(sock, &tbyte, 1)) return false;
-   
-    if (!recv_fully(sock, &nsize_net, 4)) return false;
-   
-    uint32_t size = ntohl(nsize_net);
-    DAta.resize(size);
-    if (size) {
-   
-        if (!recv_fully(sock, DAta.data(), size)) return false;
-    }
-    t = (PacketType)tbyte;
-    return true;
-}
-
-
-// For Saving the Messages into the DataBase
-
-void save_message(const string &friend_name, const string &sender,
-                  const string &type, const vector<unsigned char> &data){
-    sqlite3_stmt* stmt = nullptr;
-    string query = "INSERT INTO messages(friend_name,sender,type,content) VALUES(?,?,?,?);";
-   
-    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) != SQLITE_OK) {
-   
-        print_message(string("DB prepare failed: ") + sqlite3_errmsg(db));
-        return;
-    }
-    // Replacing the ? in the Statement with the Info of the Message
-    sqlite3_bind_text(stmt,1,friend_name.c_str(),-1,SQLITE_TRANSIENT);
-   
-    sqlite3_bind_text(stmt,2,sender.c_str(),-1,SQLITE_TRANSIENT);
-   
-    sqlite3_bind_text(stmt,3,type.c_str(),-1,SQLITE_TRANSIENT);
-   
-    sqlite3_bind_blob(stmt,4,data.data(),(int)data.size(),SQLITE_TRANSIENT);
-    if (sqlite3_step(stmt) != SQLITE_DONE) {
-        print_message(string("DB step failed: ") + sqlite3_errmsg(db));
-    }
-    sqlite3_finalize(stmt);
-}
-
-// This function is used to Display Previous Message History
-
-void display_previous_messages(const string &friend_name){
-    sqlite3_stmt* stmt = nullptr;
-    
-    string query = "SELECT sender,type,content FROM messages WHERE friend_name=? ORDER BY timestamp;";
-    
-    if (sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, NULL) != SQLITE_OK) {
-        print_message(string("DB prepare failed: ") + sqlite3_errmsg(db));
-        return;
-    }
-    sqlite3_bind_text(stmt,1,friend_name.c_str(),-1,SQLITE_TRANSIENT);
-
-    while (sqlite3_step(stmt)==SQLITE_ROW){
-        string sender = reinterpret_cast<const char*>(sqlite3_column_text(stmt,0));
-        
-        string type = reinterpret_cast<const char*>(sqlite3_column_text(stmt,1));
-        
-        const void* blob = sqlite3_column_blob(stmt,2);
-        
-        int size = sqlite3_column_bytes(stmt,2);
-        vector<unsigned char> data((unsigned char*)blob,(unsigned char*)blob+size);
-// If the data is a text then show the Message
-        if(type=="text"){
-            vector<unsigned char> dec = aes->decrypt(data);
-            string text(dec.begin(),dec.end());
-            print_message(sender + ": " + text);
-        } else if(type=="file"){
-            // IF the Type is a file just show that he sent a file
-            print_message(sender + " sent a file.");
-        }
-    }
-    sqlite3_finalize(stmt);
-}
 
 //  //// Selecting a Friend ////
 
@@ -227,76 +42,7 @@ Friend select_friend(sqlite3* db) {
     }
 }
 
-//  ///Selecting the Files using this function from the computer///
-// Return the file path to the file or the empty string if no file is selected or the folder is restricted to enter
-string file_picker(string start_dir) {
-    vector<string> entries;
-    string cwd = start_dir;
 
-    while (true) {
-        entries.clear();
-        DIR* d = opendir(cwd.c_str());
-        if (!d) return "";
-        struct dirent* e;
-        while ((e = readdir(d)) != nullptr) {
-            string name = e->d_name;
-            if (name == ".") continue;
-            entries.push_back(name);
-        }
-        closedir(d);
-        sort(entries.begin(), entries.end());
-
-        int h = max(10, LINES-6), w = max(30, COLS-10), y = (LINES-h)/2, x = (COLS-w)/2;
-        WINDOW* win = newwin(h, w, y, x); box(win,0,0);
-        mvwprintw(win,1,2,"Select file in: %s", cwd.c_str());
-        int highlight=0; keypad(win, TRUE); nodelay(win, FALSE);
-
-        while (true) {
-            // clear list area
-            for (int i=3;i<h-2;i++) {
-                for (int j=1;j<w-1;j++) mvwaddch(win,i,j,' ');
-            }
-            // draw
-            int maxRows = h-5;
-            for (int i=0; i<(int)entries.size() && i<maxRows; ++i) {
-                if (i==highlight) wattron(win, A_REVERSE);
-                mvwprintw(win, i+3, 2, "%s", entries[i].c_str());
-                if (i==highlight) wattroff(win, A_REVERSE);
-            }
-            mvwprintw(win, h-2, 2, "Enter=open/select  Backspace=..  Esc=cancel");
-            
-            wrefresh(win);
-            int ch = wgetch(win);
-            if (ch == KEY_UP)    highlight = (highlight - 1 + (int)entries.size()) % (int)entries.size();
-            
-            else if (ch == KEY_DOWN) highlight = (highlight + 1) % (int)entries.size();
-            else if (ch == 10) { // Enter
-                string pick = cwd + "/" + entries[highlight];
-                
-                struct stat st{};
-                if (stat(pick.c_str(), &st)==0) {
-                    if (S_ISDIR(st.st_mode)) {
-                        delwin(win);
-                        cwd = pick;
-                        break; // refresh listings
-                    } else if (S_ISREG(st.st_mode)) {
-                        delwin(win);
-                        return pick; // file chosen
-                    }
-                }
-            } else if (ch == KEY_BACKSPACE || ch == 127) {
-                size_t slash = cwd.find_last_of('/');
-                if (slash != string::npos && slash > 0) cwd = cwd.substr(0, slash);
-                else cwd = "/";
-                delwin(win);
-                break;
-            } else if (ch == 27) { // Esc
-                delwin(win);
-                return "";
-            }
-        }
-    }
-}
 
 //  /// Sending a Connection Request to the Friend And then If the Friend Accepts the Connection the ChatWindow Opens 
 bool request_connection_and_wait(const string& friend_ip, int friend_port) {
@@ -577,13 +323,13 @@ void StartChat(string username){
     if (f.name.empty()) {
         endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
     }
+    thread(listener_thread, LISTEN_PORT ,f.name).detach();
 
     clear(); refresh();
     mvprintw(0, 0, "Preparing to connect to %s (%s)...", f.name.c_str(), f.ip.c_str());
     refresh();
 
     // Start listener first
-    thread(listener_thread, LISTEN_PORT ,f.name).detach();
 
     mvprintw(2, 0, "Sending connect request..."); refresh();
 
