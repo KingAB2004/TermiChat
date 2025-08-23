@@ -57,6 +57,7 @@ enum PacketType : unsigned char {
     PT_CONNECT_REJECT  = 4
 };
 
+Friend f;
 
 void StartChat(string username);
 string file_picker(string dir);
@@ -64,5 +65,6 @@ void save_message(const string &friend_name, const string &sender,const string &
 void print_message(const string &msg);
 void display_previous_messages(const string &friend_name);
 static bool send_packet(int sock, PacketType t, const std::vector<unsigned char>& DAta);
-static bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) 
+static bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) ;
+void listener_thread(int port);
 #endif

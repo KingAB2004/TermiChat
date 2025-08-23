@@ -21,6 +21,8 @@ int main(){
     keypad(stdscr,TRUE);
     curs_set(0);
 
+    thread(listener_thread, LISTEN_PORT).detach();
+
     std::vector<std::string> menu = {"Add Friend","List Friends","Start a Chat","Start Group Chat","Exit"};
 
     int choice;
