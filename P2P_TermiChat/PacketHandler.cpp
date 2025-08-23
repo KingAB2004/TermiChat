@@ -3,7 +3,7 @@
 // It for sending a packet using the socket given along with the data you have to send 
 
 // Scoket Structure  ->  Packet Type 1byte  | Payload Length() 4 Byte | Payload Data Payload.size()
-static bool send_packet(int sock, PacketType t, const std::vector<unsigned char>& DAta) {
+ bool send_packet(int sock, PacketType t, const std::vector<unsigned char>& DAta) {
     // here the htonl is used to convert it into network Style
     uint32_t nsize = htonl((uint32_t)DAta.size());
     
@@ -21,7 +21,7 @@ static bool send_packet(int sock, PacketType t, const std::vector<unsigned char>
     return true;
 }
 
-static bool recv_fully(int sock, void* buf, size_t len) {
+ bool recv_fully(int sock, void* buf, size_t len) {
     char* p = (char*)buf;
 //    Checking if received fully or not
     size_t got = 0;
@@ -37,7 +37,7 @@ static bool recv_fully(int sock, void* buf, size_t len) {
 
 // Function for Receiving the Packet as ordered by the socket structure
 
-static bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) {
+ bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) {
     unsigned char tbyte;
     uint32_t nsize_net;
     if (!recv_fully(sock, &tbyte, 1)) return false;

@@ -1,17 +1,25 @@
 CXX = g++
-CXXFLAGS = -Wall -std=c++17 -lncurses -lsqlite3 -lssl -lcrypto
+CXXFLAGS = -Wall -std=c++17
+LDLIBS = -lncurses -lsqlite3 -lssl -lcrypto
 
-# Source files
-SRC = Main.cpp \
-      P2P_TermiChat/P2P_TermiChat.cpp \
-      HandleSQL/AddFriends.cpp \
-      HandleSQL/ListFriends.cpp \
-      HandleUserName/UserName.cpp \
-      Encryption/Encryptor.cpp \
-      Setup.cpp
+# Setup program sources
+SETUP_SRC = Setup.cpp
+SETUP_OBJ = $(SETUP_SRC:.cpp=.o)
 
-# Object files
-OBJ = $(SRC:.cpp=.o)
+# Main program sources
+MAIN_SRC = Main.cpp \
+           HandleSQL/AddFriends.cpp \
+           HandleSQL/ListFriends.cpp \
+           HandleUserName/UserName.cpp \
+           Encryption/Encryptor.cpp \
+           P2P_TermiChat/FilePicker.cpp \
+           P2P_TermiChat/listner.cpp \
+           P2P_TermiChat/Messages.cpp \
+           P2P_TermiChat/PacketHandler.cpp \
+           P2P_TermiChat/PrintMessage.cpp \
+           P2P_TermiChat/P2P_TermiChat.cpp
+
+MAIN_OBJ = $(MAIN_SRC:.cpp=.o)
 
 # Executable names
 SETUP = Setup
@@ -24,11 +32,11 @@ deps:
 	@command -v ncurses5-config >/dev/null 2>&1 || { echo "Installing ncurses..."; sudo apt-get install -y libncurses5-dev libncursesw5-dev; }
 	@pkg-config --exists openssl || { echo "Installing openssl..."; sudo apt-get install -y libssl-dev; }
 
-$(SETUP): Setup.o
-	$(CXX) $^ -lsqlite3 -o $@
+$(SETUP): $(SETUP_OBJ)
+	$(CXX) $^ $(LDLIBS) -o $@
 
-$(MAIN): Main.o P2P_TermiChat/P2P_TermiChat.o HandleSQL/AddFriends.o HandleSQL/ListFriends.o HandleUserName/UserName.o Encryption/Encryptor.o
-	$(CXX) $^ $(CXXFLAGS) -o $@
+$(MAIN): $(MAIN_OBJ)
+	$(CXX) $^ $(LDLIBS) -o $@
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -37,4 +45,4 @@ run: $(MAIN)
 	./$(MAIN)
 
 clean:
-	rm -f $(OBJ) $(SETUP) $(MAIN)
+	rm -f $(SETUP_OBJ) $(MAIN_OBJ) $(SETUP) $(MAIN)

@@ -5,9 +5,26 @@
 #include"./HandleSQL/AddFriends.h"
 #include"./HandleUserName/UserName.h"
 #include"./P2P_TermiChat/P2P_TermiChat.h"
-
-
 using namespace std;
+WINDOW* chat_win = nullptr;
+WINDOW* input_win = nullptr;
+mutex chat_mutex;
+bool running = true;
+
+sqlite3* db = nullptr;
+AES_Encryptor* aes = nullptr;
+
+vector<unsigned char> key(32, 0x01);
+vector<unsigned char> iv(16, 0x02);
+
+string my_username;
+string peer_username;
+atomic<bool> session_active{false};
+
+int LISTEN_PORT = 50000;
+
+Friend f;
+
 
 int main(){
 

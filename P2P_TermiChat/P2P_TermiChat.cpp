@@ -2,6 +2,14 @@
 #include "../Encryption/Encryptor.h"
 
 
+
+
+
+
+
+
+
+
 //  //// Selecting a Friend ////
 Friend select_friend(sqlite3* db) {
     sqlite3_stmt* stmt = nullptr;
