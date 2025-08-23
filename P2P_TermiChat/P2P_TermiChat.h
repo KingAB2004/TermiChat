@@ -45,8 +45,6 @@ atomic<bool> session_active{false};
 // Listening port can be choosen based on which port is free on both the computers
 int LISTEN_PORT = 50000;
 
-// ////Helper Functions//// 
-
 // This is the Packet which the user or the friend sends to confirm whether he wants to connect or not 
 // Also it Tells wheather the sent Message is a file or text
 enum PacketType : unsigned char {
