@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <ctime>
 #include <cctype>
+#include"../Encryption/Encryptor.h"
 #define BUF_SIZE 1024
 #include"../Encryption/Encryptor.h"
 
@@ -26,29 +27,28 @@ struct Friend {
     string name;
     string ip;
 };
+extern WINDOW *chat_win;
+extern WINDOW *input_win;
+extern mutex chat_mutex;
+extern bool running;
 
-//  Defining the Global variables
-WINDOW *chat_win = nullptr, *input_win = nullptr;
-mutex chat_mutex;
-bool running = true;
+extern sqlite3* db;
+extern AES_Encryptor* aes;
 
-sqlite3* db = nullptr;
-AES_Encryptor* aes = nullptr;
-// Keys can be changed based on your choice
-vector<unsigned char> key(32, 0x01);
-vector<unsigned char> iv(16, 0x02);
+extern vector<unsigned char> key;
+extern vector<unsigned char> iv;
 
-string my_username;
-string peer_username;
-atomic<bool> session_active{false};
+extern string my_username;
+extern string peer_username;
+extern atomic<bool> session_active;
 
-// Listening port can be choosen based on which port is free on both the computers
-int LISTEN_PORT = 50000;
+extern int LISTEN_PORT;
 
+extern Friend f;
 
 // This is the Packet which the user or the friend sends to confirm whether he wants to connect or not 
 // Also it Tells wheather the sent Message is a file or text
-enum PacketType : unsigned char {
+ enum PacketType : unsigned char {
     PT_TEXT            = 0,
     PT_FILE            = 1,
     PT_CONNECT_REQUEST = 2,
@@ -56,14 +56,13 @@ enum PacketType : unsigned char {
     PT_CONNECT_REJECT  = 4
 };
 
-Friend f;
 
 void StartChat(string username);
 string file_picker(string dir);
 void save_message(const string &friend_name, const string &sender,const string &type, const vector<unsigned char> &data);
 void print_message(const string &msg);
 void display_previous_messages(const string &friend_name);
-static bool send_packet(int sock, PacketType t, const std::vector<unsigned char>& DAta);
-static bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) ;
+ bool send_packet(int sock, PacketType t, const std::vector<unsigned char>& DAta);
+ bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) ;
 void listener_thread(int port);
 #endif
