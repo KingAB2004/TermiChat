@@ -17,7 +17,9 @@ MAIN_SRC = Main.cpp \
            P2P_TermiChat/Messages.cpp \
            P2P_TermiChat/PacketHandler.cpp \
            P2P_TermiChat/PrintMessage.cpp \
+           P2P_TermiChat/Sender.cpp\
            P2P_TermiChat/P2P_TermiChat.cpp
+
 
 MAIN_OBJ = $(MAIN_SRC:.cpp=.o)
 
