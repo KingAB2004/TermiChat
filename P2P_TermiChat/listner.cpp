@@ -55,6 +55,9 @@ std::string peer_ip(ip_str);
                         f.name =requester;
                         sender_thread(peer_ip);
                         vector<unsigned char> me(my_username.begin(), my_username.end());
+                            initscr(); cbreak(); noecho(); keypad(stdscr, TRUE);
+                            mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
+    wrefresh(chat_win); wrefresh(input_win);
                         send_packet(client_sock, PT_CONNECT_ACCEPT, me);
                         break;
                     } else {

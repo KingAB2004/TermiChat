@@ -119,4 +119,8 @@ void sender_thread(const string &friend_ip){
         save_message(f.name,"me","text",enc);
         close(sock);
     }
+    endwin();
+    sqlite3_close(db); db=nullptr;
+    delete aes; aes=nullptr;
+    chat_win = nullptr; input_win = nullptr;
 }

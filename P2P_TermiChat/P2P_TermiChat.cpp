@@ -125,9 +125,5 @@ void StartChat(string username){
 
     sender_thread(f.ip);
 
-    // cleaning up
-    endwin();
-    sqlite3_close(db); db=nullptr;
-    delete aes; aes=nullptr;
-    chat_win = nullptr; input_win = nullptr;
+    
 }
