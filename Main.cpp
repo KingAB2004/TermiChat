@@ -13,16 +13,11 @@ bool running = true;
 
 sqlite3* db = nullptr;
 AES_Encryptor* aes = nullptr;
-
 vector<unsigned char> key(32, 0x01);
 vector<unsigned char> iv(16, 0x02);
-
 string my_username;
 string peer_username;
-atomic<bool> session_active{false};
-
 int LISTEN_PORT = 50000;
-
 Friend f;
 
 

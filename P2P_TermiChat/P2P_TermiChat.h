@@ -65,4 +65,5 @@ void display_previous_messages(const string &friend_name);
  bool send_packet(int sock, PacketType t, const std::vector<unsigned char>& DAta);
  bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) ;
 void listener_thread(int port);
+void sender_thread(const string &friend_ip);
 #endif

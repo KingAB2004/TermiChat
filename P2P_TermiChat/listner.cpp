@@ -14,15 +14,16 @@ void listener_thread(int port){
 
     bind(server_fd,(struct sockaddr*)&addr,sizeof(addr));
     listen(server_fd,5);
-    print_message("Listening on port " + to_string(port));
-
     while(running){
         sockaddr_in client_addr{};
         socklen_t addrlen = sizeof(client_addr);
         int client_sock = accept(server_fd,(struct sockaddr*)&client_addr,&addrlen);
         if(client_sock<0) continue;
+        char ip_str[INET_ADDRSTRLEN];
+inet_ntop(AF_INET, &(client_addr.sin_addr), ip_str, INET_ADDRSTRLEN);
+std::string peer_ip(ip_str);
 
-        thread([client_sock](){
+        thread([client_sock ,peer_ip](){
             PacketType t; vector<unsigned char> DAta;
 
             while (running) {
@@ -45,7 +46,7 @@ void listener_thread(int port){
                     while (true) {
                         ch = wgetch(win);
                         if (ch=='y' || ch=='Y') { accepted=true; break; }
-                        if (ch=='n' || ch=='N' || ch==27) { break; }
+                        if (ch=='n' || ch=='N' ) { break; }
                     }
                     delwin(win);
 
@@ -53,6 +54,7 @@ void listener_thread(int port){
                         peer_username = requester;
                         f.name =requester;
                         session_active = true;
+                        sender_thread(peer_ip);
                         vector<unsigned char> me(my_username.begin(), my_username.end());
                         send_packet(client_sock, PT_CONNECT_ACCEPT, me);
                         break;
