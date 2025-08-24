@@ -70,8 +70,6 @@ make
 
 ### 🕹️ Run
 ./TermiChat
-```
-
 ---
 
 ## 📖 Usage Like a Pro
