@@ -100,15 +100,32 @@ make
 
 ---
 
-## 🤝 Contributing  
+## 🙌 Contributing
 
-Hack it, fork it, improve it. PRs welcome.  
+Feel free to contribute by opening issues or submitting pull requests.
+
+### To Contribute:
+1. Fork the repository  
+2. Create a new branch `git checkout -b feature/amazing-feature`  
+3. Make your changes  
+4. Push and open a PR 🚀
+
+---
+## 📄 License
+
+This project is licensed under the MIT License.
 
 ---
 
-## 📜 License  
+## 📬 Contact
 
-Licensed under the **MIT License** – freedom to use, modify, and share.  
+**Author**: [Arpit Bhomia]  
+🔗 GitHub: [github.com/KingAB2004](https://github.com/KingAB2004)
+
+---
+
+> ***TermiChat*** : The Most Featured Terminal Chat Application 🧠💪
+ 
 
 ---
 
