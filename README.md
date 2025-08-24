@@ -69,7 +69,9 @@ make
 ```
 
 ### 🕹️ Run
+```bash 
 ./TermiChat
+```
 ---
 
 ## 📖 Usage Like a Pro
