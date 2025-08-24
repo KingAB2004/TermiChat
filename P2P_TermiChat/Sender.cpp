@@ -3,7 +3,9 @@
 // This is the Sender Thread that handles the Sending of messages along with managing the ui of ncurses
 
 void sender_thread(const string &friend_ip){
-    while(running){
+    wrefresh(chat_win); wrefresh(input_win);
+    print_message("DEBUG: sender_thread started for " + friend_ip);        
+    while(chat_active.load()){
         werase(input_win);
         box(input_win,0,0);
         
@@ -72,7 +74,7 @@ void sender_thread(const string &friend_ip){
             }
         }
 
-        if(msg=="/quit"){ running=false; break; }
+        if(msg=="/quit"){ chat_active.store(false); break; }
 
         // Allow /file <path> as a command too
         if(msg.rfind("/file ",0)==0 && msg.size()>6){
@@ -119,8 +121,6 @@ void sender_thread(const string &friend_ip){
         save_message(f.name,"me","text",enc);
         close(sock);
     }
-    endwin();
-    sqlite3_close(db); db=nullptr;
-    delete aes; aes=nullptr;
-    chat_win = nullptr; input_win = nullptr;
+        print_message("DEBUG: Exiting sender_thread for " + friend_ip);
+
 }
