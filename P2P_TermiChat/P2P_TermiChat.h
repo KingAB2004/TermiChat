@@ -21,21 +21,12 @@
 #include"../Encryption/Encryptor.h"
 #define BUF_SIZE 1024
 #include"../Encryption/Encryptor.h"
-#include <condition_variable>
-#include<queue>
 
-struct ConnReq { std::string requester; std::string peer_ip; int client_sock; };
-
-extern std::mutex connq_m;
-extern std::queue<ConnReq> connq;
-extern std::condition_variable connq_cv;
 using namespace std;
 struct Friend {
     string name;
     string ip;
 };
-extern atomic<bool> in_chat;
-extern std::atomic<bool> chat_active;
 extern WINDOW *chat_win;
 extern WINDOW *input_win;
 extern mutex chat_mutex;
@@ -49,9 +40,6 @@ extern vector<unsigned char> iv;
 
 extern string my_username;
 extern string peer_username;
-extern std::atomic<bool> pending_auto_accept;
-extern std::string pending_peer_ip;
-extern std::string pending_peer_username;
 
 extern int LISTEN_PORT;
 

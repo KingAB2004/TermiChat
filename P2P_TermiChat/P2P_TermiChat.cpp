@@ -77,36 +77,56 @@ bool request_connection_and_wait(const string& friend_ip, int friend_port) {
 // Now this is the main function that handles all the operations of P2P Chat for our Users
 void StartChat(string username){
     my_username = username;
-    print_message("DEBUG: Entered StartChat for " + username);
 
-    // take UI ownership
+    // Init ncurses early for friend selection UI
+    initscr(); cbreak(); noecho(); keypad(stdscr, TRUE);
+
+    string home = getenv("HOME")? getenv("HOME") : ".";
+    string db_path = home + "/Public/TermiChat/friend.db";
+
+    if (sqlite3_open(db_path.c_str(), &db)) {
+        endwin();
+        cerr << "Cannot open database: " << sqlite3_errmsg(db) << "\n";
+        return;
+    }
+    // Setting the Key and initialization vector
+    aes = new AES_Encryptor(key,iv);
+
+    f = select_friend(db);
+    if (f.name.empty()) {
+        endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
+    }
+
     clear(); refresh();
+    mvprintw(0, 0, "Preparing to connect to %s (%s)...", f.name.c_str(), f.ip.c_str());
+    refresh();
 
-    int height = LINES - 3, width = COLS;
-    if (!chat_win) chat_win = newwin(height, width, 0, 0);
-    if (!input_win) input_win = newwin(3, width, height, 0);
-    scrollok(chat_win, TRUE);
+    // Start listener first
 
-    box(input_win, 0, 0);
+    mvprintw(2, 0, "Sending connect request..."); refresh();
+
+    if (!request_connection_and_wait(f.ip, LISTEN_PORT)) {
+        mvprintw(4, 0, "Connection rejected or failed. Press any key.");
+        refresh();
+        getch();
+        endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
+    }
+
+    // Build chat windows once accepted
+    int height = LINES-3, width = COLS;
+
     mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
     wrefresh(chat_win); wrefresh(input_win);
 
+    // Show previous history
     display_previous_messages(f.name);
 
-    // Mark chat active so menu pauses
-    chat_active.store(true);
-
-    // Ensure a listener thread is running (you already start it in main)
-    // Run sender loop in THIS thread so StartChat blocks while chat is active
+    // sending until not exited
     sender_thread(f.ip);
 
-    // When sender_thread returns, chat_active should be false
-    chat_active.store(false);
-    print_message("DEBUG: Leaving StartChat for " + username);
-
-    // cleanup windows visually but DO NOT endwin() or close DB
-    std::lock_guard<std::mutex> lg(chat_mutex);
-    werase(chat_win); wrefresh(chat_win);
-    werase(input_win); wrefresh(input_win);
-
+    // cleaning up
+    endwin();
+    sqlite3_close(db); db=nullptr;
+    delete aes; aes=nullptr;
+    chat_win = nullptr; input_win = nullptr;
 }

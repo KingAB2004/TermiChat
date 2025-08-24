@@ -31,18 +31,37 @@ std::string peer_ip(ip_str);
 
 
                 // Here when the Connection Request is received it opens a window in the terminal That Provides us with 2 options and if we select yes then it sends the Connection Accept packet to the sender
-               if (t == PT_CONNECT_REQUEST) {
-    std::string requester(DAta.begin(), DAta.end());
-    // enqueue for main thread to handle UI
-    {
-        std::lock_guard<std::mutex> lk(connq_m);
-        connq.push({requester, peer_ip, client_sock});
-    }
-    connq_cv.notify_one();
+                if (t == PT_CONNECT_REQUEST) {
+                    string requester(DAta.begin(), DAta.end());
 
-    // Important: do NOT close client_sock here; main thread will use it
-    return; // return from this client-handling lambda so thread finishes
-}
+                    int h=7, w=50, y=(LINES-h)/2, x=(COLS-w)/2;
+                    WINDOW* win = newwin(h,w,y,x); box(win,0,0);
+                    mvwprintw(win,1,2,"%s wants to connect.", requester.c_str());
+                    mvwprintw(win,3,4,"[Y]es   [N]o");
+                    wrefresh(win);
+
+                    int ch; bool accepted=false;
+                    keypad(win, TRUE);
+                    nodelay(win, FALSE);
+                    while (true) {
+                        ch = wgetch(win);
+                        if (ch=='y' || ch=='Y') { accepted=true; break; }
+                        if (ch=='n' || ch=='N' ) { break; }
+                    }
+                    delwin(win);
+
+                    if (accepted) {
+                        peer_username = requester;
+                        f.name =requester;
+                        sender_thread(peer_ip);
+                        vector<unsigned char> me(my_username.begin(), my_username.end());
+                        send_packet(client_sock, PT_CONNECT_ACCEPT, me);
+                        break;
+                    } else {
+                        send_packet(client_sock, PT_CONNECT_REJECT, {});
+                        break;
+                    }
+                }
                 // If he sends a text Message then the data is first decrypted and Shows the message in the Chatwindow
                 else if (t == PT_TEXT) {
                     vector<unsigned char> enc = DAta;
