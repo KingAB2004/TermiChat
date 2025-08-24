@@ -40,7 +40,6 @@ extern vector<unsigned char> iv;
 
 extern string my_username;
 extern string peer_username;
-extern atomic<bool> session_active;
 
 extern int LISTEN_PORT;
 

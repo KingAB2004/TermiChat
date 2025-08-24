@@ -53,7 +53,6 @@ std::string peer_ip(ip_str);
                     if (accepted) {
                         peer_username = requester;
                         f.name =requester;
-                        session_active = true;
                         sender_thread(peer_ip);
                         vector<unsigned char> me(my_username.begin(), my_username.end());
                         send_packet(client_sock, PT_CONNECT_ACCEPT, me);

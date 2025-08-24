@@ -64,7 +64,6 @@ bool request_connection_and_wait(const string& friend_ip, int friend_port) {
 
     if (t == PT_CONNECT_ACCEPT) {
         peer_username.assign(DAta.begin(), DAta.end());
-        session_active = true;
         close(sock);
         return true;
     } else {
@@ -123,6 +122,7 @@ void StartChat(string username){
     display_previous_messages(f.name);
 
     // sending until not exited
+
     sender_thread(f.ip);
 
     // cleaning up
