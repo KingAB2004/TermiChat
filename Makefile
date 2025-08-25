@@ -18,6 +18,7 @@ MAIN_SRC = Main.cpp \
            P2P_TermiChat/PacketHandler.cpp \
            P2P_TermiChat/PrintMessage.cpp \
            P2P_TermiChat/Sender.cpp\
+           P2P_TermiChat/ConnectionRequest.cpp\
            P2P_TermiChat/P2P_TermiChat.cpp
 
 

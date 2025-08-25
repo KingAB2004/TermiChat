@@ -81,16 +81,7 @@ void StartChat(string username){
     // Init ncurses early for friend selection UI
     initscr(); cbreak(); noecho(); keypad(stdscr, TRUE);
 
-    string home = getenv("HOME")? getenv("HOME") : ".";
-    string db_path = home + "/Public/TermiChat/friend.db";
-
-    if (sqlite3_open(db_path.c_str(), &db)) {
-        endwin();
-        cerr << "Cannot open database: " << sqlite3_errmsg(db) << "\n";
-        return;
-    }
-    // Setting the Key and initialization vector
-    aes = new AES_Encryptor(key,iv);
+    
 
     f = select_friend(db);
     if (f.name.empty()) {

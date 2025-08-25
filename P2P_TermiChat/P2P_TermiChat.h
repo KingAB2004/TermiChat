@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <ctime>
+#include<queue>
 #include <cctype>
 #include"../Encryption/Encryptor.h"
 #define BUF_SIZE 1024
@@ -27,10 +28,14 @@ struct Friend {
     string name;
     string ip;
 };
+
 extern WINDOW *chat_win;
 extern WINDOW *input_win;
 extern mutex chat_mutex;
+extern mutex Queue_mutex;
 extern bool running;
+extern queue<string>commandQueue;
+extern queue<int>SocketStore;
 
 extern sqlite3* db;
 extern AES_Encryptor* aes;
@@ -40,6 +45,7 @@ extern vector<unsigned char> iv;
 
 extern string my_username;
 extern string peer_username;
+extern string peer_ip;
 
 extern int LISTEN_PORT;
 
@@ -65,4 +71,5 @@ void display_previous_messages(const string &friend_name);
  bool receivingPacket(int sock, PacketType& t, std::vector<unsigned char>& DAta) ;
 void listener_thread(int port);
 void sender_thread(const string &friend_ip);
+void ConnectionRequest();
 #endif
