@@ -93,7 +93,9 @@ int main(){
                 else if(s == "ConnectionAccept")
                 {
                     clear();
+                    refresh();
                     sender_thread(peer_ip);
+
                 }
                 else if(s== "TextMessage")
                 {

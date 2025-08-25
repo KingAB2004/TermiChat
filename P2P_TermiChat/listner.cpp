@@ -35,12 +35,10 @@ std::string peer_ip(ip_str);
                     string requester(DAta.begin(), DAta.end());
                     peer_username =requester;
                     {
-                        unique_lock<mutex>lock(Queue_mutex);
-                        lock.unlock();
+                        unique_lock<mutex> lock(Queue_mutex);
                         commandQueue.push("ConnectionRequest");
                         SocketStore.push(client_sock);
-                        lock.lock();
-                    }
+                    } 
                     break;
                 }
                 // If he sends a text Message then the data is first decrypted and Shows the message in the Chatwindow
@@ -80,6 +78,10 @@ std::string peer_ip(ip_str);
                     {
                         string fri(DAta.begin() ,DAta.end());
                         peer_username =fri;
+                            {
+                                unique_lock<mutex> lock(Queue_mutex);
+                                commandQueue.push("GotAccepted");
+                            }
                     }
                 }
             }

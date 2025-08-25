@@ -14,6 +14,8 @@ void ConnectionRequest(){
                         if (ch=='y' || ch=='Y') { accepted=true; break; }
                         if (ch=='n' || ch=='N' ) { break; }
                     }
+                    werase(win);     // clear window content
+                    wrefresh(win);   // update the screen
                     delwin(win);
                     
                     int client_sock =SocketStore.front();
@@ -23,9 +25,7 @@ void ConnectionRequest(){
                         send_packet(client_sock, PT_CONNECT_ACCEPT, me);
                         {
                             unique_lock<mutex>lock(Queue_mutex);
-                            lock.unlock();
                             commandQueue.push("ConnectionAccept");
-                            lock.lock();
                         }
                     } else {
                         send_packet(client_sock, PT_CONNECT_REJECT, {});

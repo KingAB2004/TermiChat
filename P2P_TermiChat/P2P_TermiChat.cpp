@@ -97,20 +97,9 @@ void StartChat(string username){
 
     mvprintw(2, 0, "Sending connect request..."); refresh();
 
-    if (!request_connection_and_wait(f.ip, LISTEN_PORT)) {
-        mvprintw(4, 0, "Connection rejected or failed. Press any key.");
+    request_connection_and_wait(f.ip, LISTEN_PORT);
+        mvprintw(4, 0, "Connection Request Sent so if the Friend Accepts the Chat will be Connected");
         refresh();
         getch();
         endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
-    }
-    {
-        unique_lock<mutex> lock(Queue_mutex);
-        lock.unlock();
-        commandQueue.push("GotAccepted");
-        lock.lock();
-    }
-   
-    sqlite3_close(db); db=nullptr;
-    delete aes; aes=nullptr;
-    chat_win = nullptr; input_win = nullptr;
 }
