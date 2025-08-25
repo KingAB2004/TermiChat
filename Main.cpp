@@ -97,13 +97,6 @@ int main(){
                     sender_thread(peer_ip);
 
                 }
-                else if(s== "TextMessage")
-                {
-                    string k =TextStore.front();
-                    TextStore.pop();
-                waddstr(chat_win, k.c_str());
-                wrefresh(chat_win);
-                }
                 else if(s== "GotAccepted")
                 {
                     clear();

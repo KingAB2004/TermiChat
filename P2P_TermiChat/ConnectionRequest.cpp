@@ -22,7 +22,7 @@ void ConnectionRequest(){
                     SocketStore.pop();
                     if (accepted) {
                         vector<unsigned char> me(my_username.begin(), my_username.end());
-                        send_packet(client_sock, PT_CONNECT_ACCEPT, me);
+                        if(!send_packet(client_sock, PT_CONNECT_ACCEPT, me))endwin();
                         {
                             unique_lock<mutex>lock(Queue_mutex);
                             commandQueue.push("ConnectionAccept");

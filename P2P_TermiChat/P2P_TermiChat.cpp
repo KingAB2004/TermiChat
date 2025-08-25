@@ -57,19 +57,7 @@ bool request_connection_and_wait(const string& friend_ip, int friend_port) {
     vector<unsigned char> name_bytes(my_username.begin(), my_username.end());
     
     if (!send_packet(sock, PT_CONNECT_REQUEST, name_bytes)) { close(sock); return false; }
-
-    PacketType t; vector<unsigned char> DAta;
-    
-    if (!receivingPacket(sock, t, DAta)) { close(sock); return false; }
-
-    if (t == PT_CONNECT_ACCEPT) {
-        peer_username.assign(DAta.begin(), DAta.end());
-        close(sock);
-        return true;
-    } else {
-        close(sock);
-        return false;
-    }
+    return true;
 }
 
 
@@ -101,5 +89,4 @@ void StartChat(string username){
         mvprintw(4, 0, "Connection Request Sent so if the Friend Accepts the Chat will be Connected");
         refresh();
         getch();
-        endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
 }
