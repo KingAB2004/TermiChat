@@ -87,7 +87,8 @@ void StartChat(string username){
     if (f.name.empty()) {
         endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
     }
-
+    peer_username=f.name;
+    peer_ip =f.ip;
     clear(); refresh();
     mvprintw(0, 0, "Preparing to connect to %s (%s)...", f.name.c_str(), f.ip.c_str());
     refresh();
@@ -102,21 +103,13 @@ void StartChat(string username){
         getch();
         endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
     }
-
-    // Build chat windows once accepted
-    int height = LINES-3, width = COLS;
-
-    mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
-    wrefresh(chat_win); wrefresh(input_win);
-
-    // Show previous history
-    display_previous_messages(f.name);
-
-    // sending until not exited
-    sender_thread(f.ip);
-
-    // cleaning up
-    endwin();
+    {
+        unique_lock<mutex> lock(Queue_mutex);
+        lock.unlock();
+        commandQueue.push("GotAccepted");
+        lock.lock();
+    }
+   
     sqlite3_close(db); db=nullptr;
     delete aes; aes=nullptr;
     chat_win = nullptr; input_win = nullptr;

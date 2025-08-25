@@ -49,7 +49,6 @@ std::string peer_ip(ip_str);
         
                     vector<unsigned char> dec = aes->decrypt(enc);
                     string msg(dec.begin(), dec.end());
-        
                     string label = peer_username.empty()? "Friend" : peer_username;
                     print_message(label + ": " + msg);
                     save_message(label ,label,"text",enc);

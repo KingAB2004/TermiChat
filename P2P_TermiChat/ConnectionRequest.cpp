@@ -19,8 +19,6 @@ void ConnectionRequest(){
                     int client_sock =SocketStore.front();
                     SocketStore.pop();
                     if (accepted) {
-                        f.name =peer_username;
-                        sender_thread(peer_ip);
                         vector<unsigned char> me(my_username.begin(), my_username.end());
                         send_packet(client_sock, PT_CONNECT_ACCEPT, me);
                         {
@@ -32,5 +30,5 @@ void ConnectionRequest(){
                     } else {
                         send_packet(client_sock, PT_CONNECT_REJECT, {});
                     }
-                    
+
 }

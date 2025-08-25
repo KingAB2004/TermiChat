@@ -60,6 +60,7 @@ int main(){
 
     int choice;
     int highlight = 0;
+    string peer_ip;
 
 
 // The Program will Run until the user dont select to exit 
@@ -90,11 +91,35 @@ int main(){
                 }
                 else if(s == "ConnectionAccept")
                 {
+                    clear();
                     sender_thread(peer_ip);
                 }
+                else if(s== "TextMessage")
+                {
+                    string k =TextStore.front();
+                    TextStore.pop();
+                waddstr(chat_win, k.c_str());
+                wrefresh(chat_win);
+                }
+                else if(s== "GotAccepted")
+                {
+                    clear();
+                     // Build chat windows once accepted
+                    int height = LINES-3, width = COLS;
 
+                    mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
+                    wrefresh(chat_win); wrefresh(input_win);
+
+                    // Show previous history
+                    display_previous_messages(f.name);
+
+                    // sending until not exited
+                    sender_thread(f.ip);
+
+                    // cleaning up
+                    endwin();
+                }
                 lock.lock();
-
             }
         }
         clear();

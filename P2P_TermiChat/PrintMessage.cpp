@@ -2,8 +2,11 @@
 
 //  for Printing the Messages
 void print_message(const string &msg) {
-    std::lock_guard<std::mutex> lk(chat_mutex);
+    std::unique_lock<std::mutex> lock(Queue_mutex);
     if (!chat_win) return;
-    waddstr(chat_win, (msg + "\n").c_str());
-    wrefresh(chat_win);
+    lock.unlock();
+    commandQueue.push("TextMessage");
+    TextStore.push((msg + "\n").c_str());
+    lock.lock();
+
 }

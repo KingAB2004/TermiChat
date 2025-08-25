@@ -36,6 +36,7 @@ extern mutex Queue_mutex;
 extern bool running;
 extern queue<string>commandQueue;
 extern queue<int>SocketStore;
+extern queue<string>TextStore;
 
 extern sqlite3* db;
 extern AES_Encryptor* aes;
