@@ -11,8 +11,9 @@ WINDOW* input_win = nullptr;
 mutex chat_mutex;
 mutex Queue_mutex;
 queue<string>commandQueue;
+queue<string>TextStore;
 bool running = true;
-
+string peer_ip;
 sqlite3* db = nullptr;
 AES_Encryptor* aes = nullptr;
 vector<unsigned char> key(32, 0x01);
