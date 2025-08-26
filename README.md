@@ -43,7 +43,7 @@ This isn’t just another chat app. This is **the chat app for developers, hacke
 
 
 ![Alt text](images/Chat.png)
-![Alt text](images/Invitaion.png)
+![Alt text](images/Invitation.png)
 
 ---
 ## 🛠️ Tech Arsenal
