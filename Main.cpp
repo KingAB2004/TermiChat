@@ -92,9 +92,21 @@ int main(){
                 }
                 else if(s == "ConnectionAccept")
                 {
-                    clear();
-                    refresh();
+                     clear();
+                     // Build chat windows once accepted
+                    int height = LINES-3, width = COLS;
+
+                    mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
+                    wrefresh(chat_win); wrefresh(input_win);
+
+                    // Show previous history
+                    display_previous_messages(f.name);
+
+                    // sending until not exited
                     sender_thread(peer_ip);
+
+                    // cleaning up
+                    endwin();
 
                 }
                 else if(s== "GotAccepted")
@@ -110,7 +122,7 @@ int main(){
                     display_previous_messages(f.name);
 
                     // sending until not exited
-                    sender_thread(f.ip);
+                    sender_thread(peer_ip);
 
                     // cleaning up
                     endwin();
