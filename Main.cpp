@@ -99,7 +99,7 @@ int main(){
                     wrefresh(chat_win); wrefresh(input_win);
 
                     // Show previous history
-                    display_previous_messages(f.name);
+                    display_previous_messages(peer_username);
 
                     // sending until not exited
                     sender_thread(peer_ip);
@@ -118,7 +118,7 @@ int main(){
                     wrefresh(chat_win); wrefresh(input_win);
 
                     // Show previous history
-                    display_previous_messages(f.name);
+                    display_previous_messages(peer_username);
 
                     // sending until not exited
                     sender_thread(peer_ip);

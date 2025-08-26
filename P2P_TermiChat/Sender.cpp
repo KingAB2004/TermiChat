@@ -51,7 +51,7 @@ void sender_thread(const string &friend_ip){
                     // get back to the input field
                     werase(input_win); box(input_win,0,0);
         
-                    mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
+                    mvwprintw(input_win,1,2,"[F2: Send File]   Type here:");
                     wrefresh(input_win);
         
                     idx = 0; buffer[0]=0; // reset input
@@ -96,7 +96,7 @@ void sender_thread(const string &friend_ip){
         
                 print_message("You sent file: "+filename);
         
-                save_message(f.name,"You","file",enc);
+                save_message(peer_username,"You","file",enc);
                 close(sock);
             }
             continue;
@@ -118,7 +118,7 @@ void sender_thread(const string &friend_ip){
         send_packet(sock, PT_TEXT, enc);
         
         print_message(string("You: ") + msg);
-        save_message(f.name,"me","text",enc);
+        save_message(peer_username,"me","text",enc);
         close(sock);
     }
 }
