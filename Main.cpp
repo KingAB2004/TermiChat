@@ -131,6 +131,7 @@ int main(){
         }
         clear();
         mvprintw(0, 0, "=== TermiChat ===");
+        
         for (int i = 0; i < menu.size(); i++) {
             if (i == highlight) {
                 attron(A_REVERSE);

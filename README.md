@@ -39,6 +39,13 @@ This isn’t just another chat app. This is **the chat app for developers, hacke
 
 ---
 
+## Trailer
+
+
+![Alt text](images/Chat.png)
+![Alt text](images/invitaion.png)
+
+---
 ## 🛠️ Tech Arsenal
 
 - **Language**: C / C++  
