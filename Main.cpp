@@ -24,7 +24,7 @@ int LISTEN_PORT = 50000;
 Friend f;
 
  queue<int>SocketStore;
-
+int active_sock=0;
 
 int main(){
 

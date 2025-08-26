@@ -27,6 +27,7 @@ void ConnectionRequest(){
                             unique_lock<mutex>lock(Queue_mutex);
                             commandQueue.push("ConnectionAccept");
                         }
+                        active_sock =client_sock;
                     } else {
                         send_packet(client_sock, PT_CONNECT_REJECT, {});
                     }

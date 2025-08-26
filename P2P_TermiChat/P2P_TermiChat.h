@@ -49,6 +49,7 @@ extern string peer_username;
 extern string peer_ip;
 
 extern int LISTEN_PORT;
+extern int active_sock;
 
 extern Friend f;
 

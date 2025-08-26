@@ -45,20 +45,52 @@ Friend select_friend(sqlite3* db) {
 //  /// Sending a Connection Request to the Friend And then If the Friend Accepts the Connection the ChatWindow Opens 
 bool request_connection_and_wait(const string& friend_ip, int friend_port) {
     int sock = socket(AF_INET, SOCK_STREAM, 0);
-    
     if (sock < 0) return false;
-    sockaddr_in serv{}; serv.sin_family = AF_INET; serv.sin_port = htons(friend_port);
-    // Converting the String Address to Binary which can be correctly interpreted as the network Byte order 
+
+    sockaddr_in serv{};
+    serv.sin_family = AF_INET;
+    serv.sin_port = htons(friend_port);
     inet_pton(AF_INET, friend_ip.c_str(), &serv.sin_addr);
-    
+
     if (connect(sock, (struct sockaddr*)&serv, sizeof(serv)) < 0) {
-        close(sock); return false;
+        close(sock);
+        return false;
     }
+
+    // Send my username as a connection request
     vector<unsigned char> name_bytes(my_username.begin(), my_username.end());
-    
-    if (!send_packet(sock, PT_CONNECT_REQUEST, name_bytes)) { close(sock); return false; }
-    return true;
+    if (!send_packet(sock, PT_CONNECT_REQUEST, name_bytes)) {
+        close(sock);
+        return false;
+    }
+
+    // Now wait for ACCEPT or REJECT
+    PacketType t;
+    vector<unsigned char> data;
+    if (!receivingPacket(sock, t, data)) {
+        close(sock);
+        return false;
+    }
+
+    if (t == PT_CONNECT_ACCEPT) {
+        string peer(data.begin(), data.end());
+        peer_username = peer;
+        {
+            unique_lock<mutex> lock(Queue_mutex);
+            commandQueue.push("GotAccepted");
+            SocketStore.push(sock);   // Keep socket for chat
+        }
+        return true;
+    } else if (t == PT_CONNECT_REJECT) {
+        close(sock);
+        return false;
+    }
+
+    // Unexpected packet
+    close(sock);
+    return false;
 }
+
 
 
 

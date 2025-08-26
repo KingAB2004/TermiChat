@@ -38,9 +38,9 @@ std::string peer_ip(ip_str);
                         unique_lock<mutex> lock(Queue_mutex);
                         commandQueue.push("ConnectionRequest");
                         SocketStore.push(client_sock);
-                        
+
                     } 
-                    break;
+                    continue;
                 }
                 // If he sends a text Message then the data is first decrypted and Shows the message in the Chatwindow
                 else if (t == PT_TEXT) {
