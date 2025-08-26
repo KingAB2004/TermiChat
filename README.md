@@ -61,10 +61,7 @@ This isn’t just another chat app. This is **the chat app for developers, hacke
 
 ### 🔧 Requirements
 - `g++` or `clang++`  
-- `make` (optional)  
-- `libncurses5-dev` / `ncurses-devel`  
-- `libssl-dev` (OpenSSL)  
-- `libsqlite3-dev` (SQLite3)  
+- `make` (optional)   
 - Linux / macOS (POSIX-compliant)  
 
 ### 🚀 Build
