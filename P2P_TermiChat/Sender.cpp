@@ -32,7 +32,7 @@ void sender_thread(const string &friend_ip){
                         serv_addr.sin_family=AF_INET;
         
                         serv_addr.sin_port=htons(LISTEN_PORT);
-                        inet_pton(AF_INET,friend_ip.c_str(),&serv_addr.sin_addr);
+                        inet_pton(AF_INET,peer_ip.c_str(),&serv_addr.sin_addr);
         
                         if (connect(sock,(struct sockaddr*)&serv_addr,sizeof(serv_addr))<0){ // Connecting the socket
                             print_message("Failed to connect to " + friend_ip);
@@ -44,7 +44,7 @@ void sender_thread(const string &friend_ip){
                             send_packet(sock, PT_FILE, enc);
         
                             print_message("You sent file: " + path);
-                            save_message(f.name, "me", "file", enc);
+                            save_message(f.name, "You", "file", enc);
                             close(sock);
                         }
                     }
@@ -83,8 +83,10 @@ void sender_thread(const string &friend_ip){
 
             int sock = socket(AF_INET,SOCK_STREAM,0);
             sockaddr_in serv_addr{}; serv_addr.sin_family=AF_INET; serv_addr.sin_port=htons(LISTEN_PORT);
-            inet_pton(AF_INET,friend_ip.c_str(),&serv_addr.sin_addr);
+            inet_pton(AF_INET,peer_ip.c_str(),&serv_addr.sin_addr);
         
+
+
             if (connect(sock,(struct sockaddr*)&serv_addr,sizeof(serv_addr))<0){
                 print_message("Failed to connect to " + friend_ip);
                 close(sock);
@@ -94,7 +96,7 @@ void sender_thread(const string &friend_ip){
         
                 print_message("You sent file: "+filename);
         
-                save_message(f.name,"me","file",enc);
+                save_message(f.name,"You","file",enc);
                 close(sock);
             }
             continue;
@@ -104,7 +106,7 @@ void sender_thread(const string &friend_ip){
         
         sockaddr_in serv_addr{}; serv_addr.sin_family=AF_INET; serv_addr.sin_port=htons(LISTEN_PORT);
         
-        inet_pton(AF_INET,friend_ip.c_str(),&serv_addr.sin_addr);
+        inet_pton(AF_INET,peer_ip.c_str(),&serv_addr.sin_addr);
         if(connect(sock,(struct sockaddr*)&serv_addr,sizeof(serv_addr))<0){
             print_message("Failed to connect to " + friend_ip);
             close(sock);

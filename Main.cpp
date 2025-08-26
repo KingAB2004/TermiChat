@@ -13,7 +13,7 @@ mutex Queue_mutex;
 queue<string>commandQueue;
 queue<string>TextStore;
 bool running = true;
-string peer_ip;
+string peer_ip="";
 sqlite3* db = nullptr;
 AES_Encryptor* aes = nullptr;
 vector<unsigned char> key(32, 0x01);
@@ -61,7 +61,6 @@ int main(){
 
     int choice;
     int highlight = 0;
-    string peer_ip;
 
 
 // The Program will Run until the user dont select to exit 

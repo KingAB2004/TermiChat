@@ -21,9 +21,10 @@ void listener_thread(int port){
         if(client_sock<0) continue;
         char ip_str[INET_ADDRSTRLEN];
 inet_ntop(AF_INET, &(client_addr.sin_addr), ip_str, INET_ADDRSTRLEN);
-std::string peer_ip(ip_str);
+std::string ip(ip_str);
 
-        thread([client_sock ,peer_ip](){
+        thread([client_sock ,ip](){
+
             PacketType t; vector<unsigned char> DAta;
 
             while (running) {
@@ -34,6 +35,7 @@ std::string peer_ip(ip_str);
                 if (t == PT_CONNECT_REQUEST) {
                     string requester(DAta.begin(), DAta.end());
                     peer_username =requester;
+                    peer_ip =ip;
                     {
                         unique_lock<mutex> lock(Queue_mutex);
                         commandQueue.push("ConnectionRequest");
@@ -79,6 +81,7 @@ std::string peer_ip(ip_str);
                     {
                         string fri(DAta.begin() ,DAta.end());
                         peer_username =fri;
+                        peer_ip =ip;
                             {
                                 unique_lock<mutex> lock(Queue_mutex);
                                 commandQueue.push("GotAccepted");
