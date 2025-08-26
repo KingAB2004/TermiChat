@@ -42,8 +42,8 @@ This isn’t just another chat app. This is **the chat app for developers, hacke
 ## Trailer
 
 
-![Alt text](images/Chat.png)
 ![Alt text](images/Invitation.png)
+![Alt text](images/Chat.png)
 
 ---
 ## 🛠️ Tech Arsenal
