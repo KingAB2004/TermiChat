@@ -1,41 +1,71 @@
-# ⚡ TermiChat ⚡  
+# ⚡ TermiChat ⚡
 
-**The Ultimate Terminal-Based Chat Application – Where Speed, Security, and Style Meet.**  
+**The Ultimate Terminal-Based Chat Application – Where Speed, Security, and Style Meet.**
 
-Tired of bloated chat apps stealing your data, eating your RAM, and tracking your every word?  
-**Enter TermiChat**: a **lightweight, lightning-fast, hacker-grade terminal messenger** that runs straight in your shell – no nonsense, no spyware, just pure encrypted communication.  
+Tired of bloated chat apps stealing your data, eating your RAM, and tracking your every word?
+**Enter TermiChat**: a **lightweight, lightning-fast, hacker-grade terminal messenger** that runs straight in your shell – no nonsense, no spyware, just pure encrypted communication.
 
-Built on raw **POSIX sockets**, armored with **AES-256 military-grade encryption**, styled with **ncurses UI**, powered by **multithreading & mutex locks**, and backed by the rock-solid **SQLite3 database** for **permanent storage of friends and messages**.  
+Built on raw **POSIX sockets**, armored with **AES-256 military-grade encryption**, styled with **ncurses UI**, powered by **multithreading & mutex locks**, and backed by the rock-solid **SQLite3 database** for **permanent storage of friends and messages**.
 
-This isn’t just another chat app. This is **the chat app for developers, hackers, and power-users** who live in the terminal.  
+This isn’t just another chat app. This is **the chat app for developers, hackers, and power-users** who live in the terminal.
 
 ---
 
 ## 🔥 Features That Put Others to Shame
 
-- **🖥️ Sleek Hacker-Style Terminal UI**  
-  Forget flashy GUIs – TermiChat’s **ncurses interface** feels like the cockpit of a cyberpunk mainframe.  
+* **🖥️ Sleek Hacker-Style Terminal UI**
+  Forget flashy GUIs – TermiChat’s **ncurses interface** feels like the cockpit of a cyberpunk mainframe.
 
-- **💾 Persistent Storage with SQLite3**  
-  Every friend, every message, every conversation is **etched into an SQLite3 database**, surviving crashes, reboots, and time itself.  
+* **💾 Persistent Storage with SQLite3**
+  Every friend, every message, every conversation is **etched into an SQLite3 database**, surviving crashes, reboots, and time itself.
 
-- **💬 Conversation History**  
-  Scroll back and **revisit past battles of wit and memes** directly inside the terminal.  
+* **💬 Conversation History**
+  Scroll back and **revisit past battles of wit and memes** directly inside the terminal.
 
-- **👥 Friend System**  
-  Add friends, manage contacts – like your own private network of agents.  
+* **👥 Friend System**
+  Add friends, manage contacts – like your own private network of agents.
 
-- **🔗 P2P Chat with Permission Handshake**  
-  No sneaky backdoors. Every connection is **permission-based**, you decide who talks to you.  
+* **🔗 P2P Chat with Permission Handshake**
+  No sneaky backdoors. Every connection is **permission-based**, you decide who talks to you.
 
-- **📂 File Transfer, But Encrypted**  
-  Send and receive files over the chat with **AES-256 wrapping every byte**.  
+* **📂 File Transfer, But Encrypted**
+  Send and receive files over the chat with **AES-256 wrapping every byte**.
 
-- **🔒 AES-256 End-to-End Encryption**  
-  Same encryption standard used by **banks, militaries, and intelligence agencies** – now in your terminal.  
+* **🔒 AES-256 End-to-End Encryption**
+  Same encryption standard used by **banks, militaries, and intelligence agencies** – now in your terminal.
 
-- **⚡ Multithreaded Performance**  
-  Runs like a beast with **POSIX threads** and **mutexes**, ensuring **zero race conditions** and **buttery-smooth concurrency**.  
+* **⚡ Multithreaded Performance**
+  Runs like a beast with **POSIX threads** and **mutexes**, ensuring **zero race conditions** and **buttery-smooth concurrency**.
+
+* **🔁 Thread-safe Command Queue (connection & event management)**
+  TermiChat uses a producer–consumer pattern with a **thread-safe queue** (mutex + `std::condition_variable`) to pass connection requests, UI commands, and network events between threads. This keeps the UI responsive while background threads handle networking, database I/O, and file transfers.
+
+  **Why this matters:**
+
+  * The UI thread (ncurses) stays snappy because it only enqueues user actions and renders UI; heavy work happens in worker threads.
+  * Background threads consume commands from the queue and perform blocking I/O (network, disk, encryption) without freezing the UI.
+
+---
+
+## Architecture (high-level)
+
+1. **UI Thread And Sender Thread (main)**
+
+   * Runs ncurses, reads keyboard input, draws windows and menus.
+   * Packs user actions into commands and pushes them into the thread-safe queue
+   * Database access (SQLite3)
+   * Network I/O (POSIX sockets)
+   * Encryption/decryption (OpenSSL AES-256)
+   * File transfer logic
+
+2. **Listener / Chat Threads**
+
+   * A detached listener accepts incoming connections and enqueues connection requests (so the UI can prompt the user).
+   * Active chat sessions may run in dedicated threads for streaming data while the worker thread stays available for other commands.
+
+3. **Thread-safe Queues**
+
+   * All cross-thread handoffs (commands, socket IDs, file-transfer tasks) go through thread-safe queues to avoid races.
 
 ---
 
@@ -61,10 +91,7 @@ This isn’t just another chat app. This is **the chat app for developers, hacke
 
 ### 🔧 Requirements
 - `g++` or `clang++`  
-- `make` (optional)  
-- `libncurses5-dev` / `ncurses-devel`  
-- `libssl-dev` (OpenSSL)  
-- `libsqlite3-dev` (SQLite3)  
+- `make` (optional)   
 - Linux / macOS (POSIX-compliant)  
 
 ### 🚀 Build
@@ -134,9 +161,3 @@ This project is licensed under the MIT License.
 ---
 
 > ***TermiChat*** : The Most Featured Terminal Chat Application 🧠💪
- 
-
----
-
-⚡ **TermiChat** – Not just a chat app. A statement.  
-Welcome to the **future of encrypted terminal communication.** ⚡  
