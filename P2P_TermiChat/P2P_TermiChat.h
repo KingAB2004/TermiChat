@@ -1,6 +1,6 @@
 #ifndef P2P_H
 #define P2P_H
-
+// This is the main header file which is used in all the files realted to Communication
 #include <sqlite3.h>
 #include <ncurses.h>
 #include <thread>
@@ -28,7 +28,7 @@ struct Friend {
     string name;
     string ip;
 };
-
+// Initializing all the global variables here
 extern WINDOW *chat_win;
 extern WINDOW *input_win;
 extern mutex chat_mutex;

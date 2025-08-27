@@ -57,14 +57,15 @@ bool request_connection_and_wait(const string& friend_ip, int friend_port) {
         return false;
     }
 
-    // Send my username as a connection request
+    // Sending userName when sending the request so the other side can also use my username when i send the messages 
+
     vector<unsigned char> name_bytes(my_username.begin(), my_username.end());
     if (!send_packet(sock, PT_CONNECT_REQUEST, name_bytes)) {
         close(sock);
         return false;
     }
 
-    // Now wait for ACCEPT or REJECT
+    // Now waiting for receiving a packet for accept or reject
     PacketType t;
     vector<unsigned char> data;
     if (!receivingPacket(sock, t, data)) {
@@ -100,9 +101,7 @@ void StartChat(string username){
 
     // Init ncurses early for friend selection UI
     initscr(); cbreak(); noecho(); keypad(stdscr, TRUE);
-
-    
-
+    // Doing the friend selection
     f = select_friend(db);
     if (f.name.empty()) {
         endwin(); sqlite3_close(db); db=nullptr; delete aes; aes=nullptr; return;
@@ -113,12 +112,11 @@ void StartChat(string username){
     mvprintw(0, 0, "Preparing to connect to %s (%s)...", f.name.c_str(), f.ip.c_str());
     refresh();
 
-    // Start listener first
-
     mvprintw(2, 0, "Sending connect request..."); refresh();
 
+    // Send the request for connection and wait for the other user to accept
     request_connection_and_wait(f.ip, LISTEN_PORT);
-        mvprintw(4, 0, "Connection Request Sent so if the Friend Accepts the Chat will be Connected");
+        mvprintw(4, 0, "Connection Request Sent so if the Friend Accepts the Chat then you will be Connected");
         refresh();
         getch();
 }

@@ -6,6 +6,8 @@
 #include"./HandleUserName/UserName.h"
 #include"./P2P_TermiChat/P2P_TermiChat.h"
 using namespace std;
+
+// Defing all the variables defined in the header file
 WINDOW* chat_win = nullptr;
 WINDOW* input_win = nullptr;
 mutex chat_mutex;
@@ -22,7 +24,6 @@ string my_username;
 string peer_username;
 int LISTEN_PORT = 50000;
 Friend f;
-
  queue<int>SocketStore;
 int active_sock=0;
 
@@ -43,6 +44,7 @@ int main(){
     
     input_win = newwin(3,width,height,0);
     scrollok(chat_win,TRUE);
+    // Setting the database
     string home = getenv("HOME")? getenv("HOME") : ".";
     string db_path = home + "/Public/TermiChat/friend.db";
 
@@ -57,7 +59,7 @@ int main(){
     box(input_win,0,0);
     thread(listener_thread, LISTEN_PORT).detach();
 
-    std::vector<std::string> menu = {"Add Friend","List Friends","Start a Chat","Start Group Chat","Exit"};
+    std::vector<std::string> menu = {"Add Friend","List Friends","Start a Chat","Exit"};
 
     int choice;
     int highlight = 0;
@@ -68,6 +70,7 @@ int main(){
     while (true) {
         {
             unique_lock<mutex> lock(Queue_mutex);
+            // Every Functionality os the Queue is mentioned here
             while(!commandQueue.empty())
             {
                 string s =commandQueue.front();
@@ -89,11 +92,9 @@ int main(){
                 {
                     ConnectionRequest();
                 }
-                else if(s == "ConnectionAccept")
+                else if(s == "ConnectionAccept" || s== "GotAccepted" )
                 {
                      clear();
-                     // Build chat windows once accepted
-                    int height = LINES-3, width = COLS;
 
                     mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
                     wrefresh(chat_win); wrefresh(input_win);
@@ -107,29 +108,12 @@ int main(){
                     // cleaning up
                     endwin();
 
-                }
-                else if(s== "GotAccepted")
-                {
-                    clear();
-                     // Build chat windows once accepted
-                    int height = LINES-3, width = COLS;
-
-                    mvwprintw(input_win,1,2,"[F2: Send File]  Type here:");
-                    wrefresh(chat_win); wrefresh(input_win);
-
-                    // Show previous history
-                    display_previous_messages(peer_username);
-
-                    // sending until not exited
-                    sender_thread(peer_ip);
-
-                    // cleaning up
-                    endwin();
                 }
                 lock.lock();
             }
         }
         clear();
+        // Initializing the main Screen
         mvprintw(0, 0, "=== TermiChat ===");
         
         for (int i = 0; i < menu.size(); i++) {
@@ -162,10 +146,6 @@ int main(){
                     commandQueue.push("StartChat");
                 } 
                 else if (highlight == 3) {
-                    // Will Be pushed in later Versions
-                    mvprintw(menu.size() + 3, 0, "You chose Start Group Chat But Sorry it will be pushed in later versions");
-                }
-                else if (highlight == 4) {
                     endwin();
                     return 0;
                 }
